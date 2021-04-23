@@ -1,5 +1,8 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, File, UploadFile, Request
 from fastapi.responses import HTMLResponse
+from fastapi.encoders import jsonable_encoder
+import shutil
+
 
 app = FastAPI()
 
@@ -8,5 +11,20 @@ app = FastAPI()
 def home():
     with open("./html/index.html") as index123:
         html = index123.read()
-
     return HTMLResponse(content=html, status_code=200)
+
+
+@app.post("/post",response_class=HTMLResponse)
+async def image(sentdata: UploadFile = File(...)):
+    with open(f"{sentdata.filename}", "wb") as buffer:
+        shutil.copyfileobj(sentdata.file, buffer)
+    return {"filename": sentdata.filename}
+
+
+@app.post("/post1")
+async def image(request: Request):
+    da = await request.body()
+    print(da)
+    da1 = jsonable_encoder(da)
+    return da1
+
